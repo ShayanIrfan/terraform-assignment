@@ -61,7 +61,7 @@ resource "aws_iam_instance_profile" "ec2_ssm_profile" {
 
 # EC2 Instance
 resource "aws_instance" "web" {
-  ami           = "ami-0735c191cf914754d" # Amazon Linux 2 AMI ID (update for your region)
+  ami           = "ami-087fba4aa07ebd20f"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.public_1.id
 
