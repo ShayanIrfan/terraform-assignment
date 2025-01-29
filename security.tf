@@ -66,7 +66,7 @@ resource "aws_instance" "web" {
   subnet_id     = aws_subnet.public_1.id
 
   # Attach the IAM instance profile
-  iam_instance_profile = aws_iam_instance_profile.ec2.name
+  iam_instance_profile = aws_iam_instance_profile.ec2_ssm_profile.name
 
   # Attach the security group
   vpc_security_group_ids = [aws_security_group.ec2.id]
