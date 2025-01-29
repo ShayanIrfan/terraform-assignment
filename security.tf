@@ -29,19 +29,46 @@ resource "aws_security_group" "ec2" {
   }
 }
 
-# Key pair
-resource "aws_key_pair" "deployer" {
-  key_name   = "${var.project_name}-key"
-  public_key = file("~/.ssh/id_rsa.pub")  # Make sure this key exists
+# Create IAM role for EC2 to use Systems Manager
+resource "aws_iam_role" "ec2_ssm_role" {
+  name = "ec2_ssm_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# Attach AmazonSSMManagedInstanceCore policy to the role
+resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
+  role       = aws_iam_role.ec2_ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+# Create IAM instance profile
+resource "aws_iam_instance_profile" "ec2_ssm_profile" {
+  name = "ec2_ssm_profile"
+  role = aws_iam_role.ec2_ssm_role.name
 }
 
 # EC2 Instance
 resource "aws_instance" "web" {
-  ami           = "ami-0735c191cf914754d"  # Amazon Linux 2 AMI ID (update for your region)
+  ami           = "ami-0735c191cf914754d" # Amazon Linux 2 AMI ID (update for your region)
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.public_1.id
-  key_name      = aws_key_pair.deployer.key_name
 
+  # Attach the IAM instance profile
+  iam_instance_profile = aws_iam_instance_profile.ec2.name
+
+  # Attach the security group
   vpc_security_group_ids = [aws_security_group.ec2.id]
 
   tags = {
