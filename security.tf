@@ -62,7 +62,7 @@ resource "aws_iam_instance_profile" "ec2_ssm_profile" {
 # EC2 Instance
 resource "aws_instance" "web" {
   ami           = "ami-087fba4aa07ebd20f"
-  instance_type = "t2.micro"
+  instance_type = "t3.micro"
   subnet_id     = aws_subnet.public_1.id
 
   # Attach the IAM instance profile
